@@ -50,9 +50,16 @@ module OmniAuth
       end
 
       def build_access_token
-        if !signed_request.nil? && !signed_request.empty?
+        verifier = false
+        if request.params.key?('code')
+          verifier = request.params['code']
+          _redirect_uri = callback_url
+        elsif !signed_request.nil? && !signed_request.empty?
           verifier = signed_request['code']
-          client.auth_code.get_token(verifier, {:redirect_uri => ''}.merge(options))
+          _redirect_uri = ''
+        end
+        if verifier
+          client.auth_code.get_token(verifier, { :redirect_uri => _redirect_uri }.merge(options))
         elsif !facebook_session.nil? && !facebook_session.empty?
           @access_token = ::OAuth2::AccessToken.new(client, facebook_session['access_token'], {:mode => :query, :param_name => 'access_token'})
         else
