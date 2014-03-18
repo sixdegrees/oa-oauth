@@ -55,7 +55,8 @@ module OmniAuth
       protected
 
       def request_phase
-        redirect client.auth_code.authorize_url({:redirect_uri => callback_url}.merge(options))
+        authorize_options = options.reject { |k,v| k.to_s == 'setup' }
+        redirect client.auth_code.authorize_url({:redirect_uri => callback_url}.merge(authorize_options))
       end
 
       def callback_phase
